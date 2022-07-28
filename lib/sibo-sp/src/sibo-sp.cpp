@@ -30,6 +30,13 @@
 
 #include "sibo-sp.h"
 
+#if defined(RP2040)
+    #include "pico/stdlib.h"
+    #include "hardware/pio.h"
+    #include "hardware/clocks.h"
+    #include "sibo-sp.pio.h"
+#endif
+
 SIBOSPConnection::SIBOSPConnection() {
     _direct_pin_mode = false;
     _force_asic5 = false;
@@ -40,6 +47,27 @@ SIBOSPConnection::SIBOSPConnection() {
     setClockPin(15);
     setDirPin(16);
     setClockEnablePin(17);
+
+
+    // Test code for PIO
+    static const uint led_pin = 25;
+    static const float pio_freq = 2000;
+
+    PIO pio = pio0;
+
+    uint sm = pio_claim_unused_sm(pio, true);
+
+    uint offset = pio_add_program(pio, &sibosp_reset_program);
+
+    float div = (float)clock_get_hz(clk_sys) / pio_freq;
+
+    sibosp_reset_program_init(pio, sm, offset, led_pin, div);
+
+    pio_sm_set_enabled(pio, sm, true);
+    sleep_ms(4000);
+    pio_sm_set_enabled(pio, sm, false);
+
+
 #elif defined(ESP32)
     setDataPin(17);
     setClockPin(16);

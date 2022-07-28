@@ -1,0 +1,55 @@
+.program sibosp_reset
+
+set x, 11
+
+bitloop:
+    set pins, 1     [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    set pins, 0     [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    nop             [19]
+    jmp x-- bitloop [19]
+
+.wrap_target
+    nop
+.wrap
+
+
+% c-sdk {
+
+void sibosp_reset_program_init(PIO pio, uint sm, uint offset, uint pin, float div) {
+    pio_sm_config c = sibosp_reset_program_get_default_config(offset);
+    pio_gpio_init(pio, pin);
+    sm_config_set_set_pins (&c, pin, 1);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+
+    sm_config_set_clkdiv(&c, div);
+
+    pio_sm_init(pio, sm, offset, &c);
+}
+
+%}
